@@ -72,10 +72,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
         }
     }
 
-    private fun selectUser(user: User) {
-        viewModel.selectItem(user, !viewModel.viewState.value.selectedUsers.contains(user))
-    }
-
     private fun isSelectionModeIsEnabled() = viewModel.viewState.value.isMultiSelectEnabled
 
     private fun navigateToDetails(userId: Int) {

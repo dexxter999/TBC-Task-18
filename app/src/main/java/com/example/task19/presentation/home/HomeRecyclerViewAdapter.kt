@@ -2,16 +2,18 @@ package com.example.task19.presentation.home
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.task19.databinding.UserRecyclerItemBinding
-import com.example.task19.domain.model.User
+import com.example.task19.presentation.model.User
 
 class HomeRecyclerViewAdapter :
     ListAdapter<User, HomeRecyclerViewAdapter.UserViewHolder>(UserDiffCallback()) {
 
     private var onItemClick: ((User) -> Unit)? = null
+    private var onItemLongClick: ((User) -> Unit)? = null
 
     inner class UserViewHolder(private val binding: UserRecyclerItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -23,10 +25,21 @@ class HomeRecyclerViewAdapter :
             tvEmail.text = user.email
             tvName.text = user.firstName
             tvLastName.text = user.lastName
+
+            cbSelect.isVisible = user.itemState == User.ItemState.MULTI_SELECTION_STATE
+
+            root.setOnLongClickListener {
+                onItemLongClick?.invoke(user)
+                user.itemState =
+                    if (user.itemState == User.ItemState.MULTI_SELECTION_STATE) User.ItemState.NORMAL_STATE
+                    else User.ItemState.MULTI_SELECTION_STATE
+
+                cbSelect.isVisible = user.itemState == User.ItemState.MULTI_SELECTION_STATE
+
+                true
+            }
             root.setOnClickListener { onItemClick?.invoke(user) }
         }
-
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
@@ -45,5 +58,9 @@ class HomeRecyclerViewAdapter :
 
     fun onItemClick(click: (User) -> Unit) {
         this.onItemClick = click
+    }
+
+    fun onItemLongClick(longClick: (User) -> Unit) {
+        this.onItemLongClick = longClick
     }
 }

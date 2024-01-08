@@ -1,7 +1,7 @@
 package com.example.task19.domain.model
 
 
-data class User(
+data class UserDomain(
     val avatar: String?,
     val email: String?,
     val firstName: String?,

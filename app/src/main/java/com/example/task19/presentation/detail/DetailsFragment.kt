@@ -35,7 +35,7 @@ class DetailsFragment : BaseFragment<FragmentDetailsBinding>(FragmentDetailsBind
                 viewModel.viewState.collect { viewState ->
                     binding.progressBar.isVisible = viewState.isLoading
 
-                    viewState.user.let { userResource ->
+                    viewState.userDomain.let { userResource ->
                         if (userResource is Resource.Success) {
                             val user = userResource.data
 

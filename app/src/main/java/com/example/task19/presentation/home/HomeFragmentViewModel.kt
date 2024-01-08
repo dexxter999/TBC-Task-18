@@ -67,13 +67,9 @@ class HomeFragmentViewModel @Inject constructor(private val getUsersListUseCase:
         val selectedUsers = _viewState.value.selectedUsers
         val updatedUsersList = _viewState.value.usersList.toMutableList()
 
-        d("DeleteItems", "Selected Users before removal: $selectedUsers")
-
         updatedUsersList.retainAll { user ->
             user !in selectedUsers
         }
-
-        d("DeleteItems", "Updated Users List after removal: $updatedUsersList")
 
         _viewState.update {
             it.copy(

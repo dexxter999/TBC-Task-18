@@ -1,11 +1,12 @@
 package com.example.task19.common.helper.resource
 
-fun <T, R> Resource<T>.mapToDomain(mapper: (T) -> R): Resource<R> {
-    return when (this) {
-        is Resource.Success -> Resource.Success(mapper(data))
-        is Resource.Error -> Resource.Error(errorMessage)
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+fun <T, R> Flow<Resource<T>>.mapToDomain(mapper: (T) -> R): Flow<Resource<R>> =
+    this.map { resource ->
+        when (resource) {
+            is Resource.Success -> Resource.Success(mapper(resource.data))
+            is Resource.Error -> Resource.Error(resource.errorMessage)
+        }
     }
-}
-
-
-

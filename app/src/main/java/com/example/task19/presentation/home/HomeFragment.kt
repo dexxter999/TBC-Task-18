@@ -10,7 +10,6 @@ import com.example.task19.common.base.BaseFragment
 import com.example.task19.common.helper.Listeners
 import com.example.task19.common.helper.Observers
 import com.example.task19.databinding.FragmentHomeBinding
-import com.example.task19.presentation.model.User
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -53,7 +52,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     override fun listeners() {
         adapter.onItemClick { user ->
             if (isSelectionModeIsEnabled()) {
-                viewModel.selectItem(user, !user.isSelected)
+                viewModel.onEvent(HomeFragmentEvents.SelectItemEvent(user, !user.isSelected))
             } else {
                 navigateToDetails(user.id!!)
             }
@@ -61,14 +60,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
 
         adapter.onItemLongClick { user ->
             if (!isSelectionModeIsEnabled()) {
-                viewModel.selectionMode(true)
+                viewModel.onEvent(HomeFragmentEvents.SelectionModeEvent(true))
             }
-            viewModel.selectItem(user, true)
+            viewModel.onEvent(HomeFragmentEvents.SelectItemEvent(user, true))
         }
 
 
         binding.buttonDelete.setOnClickListener {
-            viewModel.deleteItems()
+            viewModel.onEvent(HomeFragmentEvents.DeleteUserEvent)
         }
     }
 

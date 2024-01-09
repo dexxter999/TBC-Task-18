@@ -10,7 +10,6 @@ import com.example.task19.data.remote.network.model.toUser
 import com.example.task19.domain.model.UserDomain
 import com.example.task19.domain.repository.UsersRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class UsersRepositoryImpl @Inject constructor(
@@ -21,22 +20,26 @@ class UsersRepositoryImpl @Inject constructor(
 
 
     override suspend fun getUsersList(): Flow<Resource<List<UserDomain>>> {
-        return flow {
-            emit(responseHandler.handleApiCall {
-                usersServiceMocky.getUsers()
-            }.mapToDomain { list ->
-                list?.map { it.toUser() } ?: emptyList()
-            })
+        return responseHandler.handleApiCall {
+            usersServiceMocky.getUsers()
+        }.mapToDomain { list ->
+            list.map { it.toUser() }
         }
+
     }
 
     override suspend fun getUser(id: Int): Flow<Resource<UserDomain>> {
-        return flow {
-            emit(responseHandler.handleApiCall {
-                usersService.getUserDetail(id)
-            }.mapToDomain { userDtoWrapper ->
-                userDtoWrapper!!.data.toUser()
-            })
+        return responseHandler.handleApiCall {
+            usersService.getUserDetail(id)
+        }.mapToDomain { userDtoWrapper ->
+            userDtoWrapper.data.toUser()
+        }
+
+    }
+
+    override suspend fun deleteUser(id: Int): Flow<Resource<Unit>> {
+        return responseHandler.handleApiCall {
+            usersService.deleteUser(id)
         }
     }
 }

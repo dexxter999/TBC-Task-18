@@ -64,5 +64,4 @@ object RemoteModule {
     @ReqresService
     fun provideUsersServiceReqres(@ReqresRetrofit retrofit: Retrofit): UsersService =
         retrofit.create(UsersService::class.java)
-
 }

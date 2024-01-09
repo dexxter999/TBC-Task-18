@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface UsersRepository {
     suspend fun getUsersList(): Flow<Resource<List<UserDomain>>>
     suspend fun getUser(id: Int): Flow<Resource<UserDomain>>
+    suspend fun deleteUser(id: Int): Flow<Resource<Unit>>
 }

@@ -1,11 +1,10 @@
 package com.example.task19.presentation.home
 
-import android.util.Log.d
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.task19.common.helper.resource.Resource
 import com.example.task19.domain.model.toPresentation
-import com.example.task19.domain.use_case.GetUserListUseCase
+import com.example.task19.domain.use_case.UserUseCase
 import com.example.task19.presentation.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeFragmentViewModel @Inject constructor(private val getUsersListUseCase: GetUserListUseCase) :
+class HomeFragmentViewModel @Inject constructor(private val userUseCase: UserUseCase) :
     ViewModel() {
 
     private val _viewState = MutableStateFlow(HomeViewState())
@@ -26,10 +25,18 @@ class HomeFragmentViewModel @Inject constructor(private val getUsersListUseCase:
         getUsersList()
     }
 
+    fun onEvent(event: HomeFragmentEvents) {
+        when (event) {
+            is HomeFragmentEvents.SelectItemEvent -> selectItem(event.user, event.isSelected)
+            is HomeFragmentEvents.SelectionModeEvent -> selectionMode(event.isSelectionModeStarted)
+            is HomeFragmentEvents.DeleteUserEvent -> deleteItems()
+        }
+    }
+
     private fun getUsersList() = viewModelScope.launch {
         _viewState.update { it.copy(isLoading = true) }
 
-        getUsersListUseCase().collectLatest { resource ->
+        userUseCase.getUsersList().collectLatest { resource ->
             when (resource) {
                 is Resource.Success -> {
                     val userList = resource.data.map { it.toPresentation() }
@@ -52,7 +59,7 @@ class HomeFragmentViewModel @Inject constructor(private val getUsersListUseCase:
         }
     }
 
-    fun selectItem(user: User, isSelected: Boolean) {
+    private fun selectItem(user: User, isSelected: Boolean) {
         if (isSelected) {
             getItemsById().add(user)
         } else {
@@ -63,12 +70,16 @@ class HomeFragmentViewModel @Inject constructor(private val getUsersListUseCase:
         }
     }
 
-    fun deleteItems() {
+    private fun deleteItems() = viewModelScope.launch {
         val selectedUsers = _viewState.value.selectedUsers
         val updatedUsersList = _viewState.value.usersList.toMutableList()
 
         updatedUsersList.retainAll { user ->
             user !in selectedUsers
+        }
+
+        selectedUsers.forEach { user ->
+            userUseCase.deleteUser(user.id!!).collectLatest { }
         }
 
         _viewState.update {
@@ -79,9 +90,10 @@ class HomeFragmentViewModel @Inject constructor(private val getUsersListUseCase:
                 isMultiSelectEnabled = false
             )
         }
+
     }
 
-    fun selectionMode(isSelectionModeStarted: Boolean) {
+    private fun selectionMode(isSelectionModeStarted: Boolean) {
         _viewState.update {
             it.copy(
                 isMultiSelectEnabled = isSelectionModeStarted,
@@ -102,3 +114,9 @@ data class HomeViewState(
     val isError: Boolean = false,
     val isMultiSelectEnabled: Boolean = false
 )
+
+sealed class HomeFragmentEvents {
+    data class SelectItemEvent(val user: User, var isSelected: Boolean) : HomeFragmentEvents()
+    data class SelectionModeEvent(var isSelectionModeStarted: Boolean) : HomeFragmentEvents()
+    data object DeleteUserEvent : HomeFragmentEvents()
+}

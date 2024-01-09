@@ -1,25 +1,27 @@
 package com.example.task19.common.helper.resource
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
 import javax.inject.Inject
 
 class ResponseHandler @Inject constructor() {
-    suspend fun <T : Any> handleApiCall(apiCall: suspend () -> Response<T>): Resource<T?> {
-        return try {
+    fun <T : Any> handleApiCall(apiCall: suspend () -> Response<T>): Flow<Resource<T>> = flow {
+        try {
             val response = apiCall()
             if (response.isSuccessful) {
-                Resource.Success(response.body())
+                emit(Resource.Success(response.body()!!))
             } else {
-                Resource.Error("Code: ${response.code()}, Something went wrong")
+                emit(Resource.Error("Error Code: ${response.code()}"))
             }
         } catch (e: IOException) {
-            Resource.Error(e.message)
+            emit(Resource.Error("Network error: ${e.message}"))
         } catch (e: HttpException) {
-            Resource.Error(e.message())
+            emit(Resource.Error("HTTP error: ${e.message}"))
         } catch (e: Exception) {
-            Resource.Error(e.message)
+            emit(Resource.Error("Unknown error: ${e.message}"))
         }
     }
 }
